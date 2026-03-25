@@ -127,7 +127,7 @@ plot(fitted(model_linear), residuals(model_linear),
      pch = 19, col = rgb(0,0,1,0.3))
 abline(h = 0, col = "red", lwd = 2)
 dev.off()
-# STEP 4.2: Log Transformed Linear Regression Model
+#4.2: Log Transformed Linear Regression Model
 model_data_log <- transform(
   model_data,
   log_tot_kg = log(tot_kg),
@@ -141,7 +141,7 @@ model_data_log <- transform(
 )
 summary(model_data_log)
 
-#STEP 4.2 log-linear model
+#4.2 log-linear model
 model_linear_log <- lm(
   log_tot_kg ~ log_ammonia +
     log_refineries +
