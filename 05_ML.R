@@ -25,6 +25,7 @@ cat("Rows:", nrow(ml_data), "\n")
 cat("Missing values:", sum(is.na(ml_data)), "\n")
 
 # Step 1: Decision Tree
+#Full Model
 set.seed(42)
 
 tree_model <- rpart(
@@ -51,6 +52,49 @@ dev.off()
 cat("Tree saved!\n")
 
 # Step 2: Random Forest
+# Demand-only Random Forest
+demand_features <- c("mms_refineries_kg", "mms_metals_kg", "mms_ammonia_kg",
+                     "mms_ld_fcev_kg", "mms_mhd_fcev_kg", 
+                     "mms_season_enrgy_strg_kg", "a_sqkm")
+
+set.seed(42)
+rf_demand <- randomForest(
+  total_resource_minus_total_demand_kg ~ mms_refineries_kg + 
+    mms_metals_kg + mms_ammonia_kg + mms_ld_fcev_kg + 
+    mms_mhd_fcev_kg + mms_season_enrgy_strg_kg + a_sqkm,
+  data = train_data,
+  ntree = 200,
+  importance = TRUE
+)
+#Training
+train_preds_demand <- predict(rf_demand, train_data)
+train_r2_demand <- 1 - sum((train_data$total_resource_minus_total_demand_kg - 
+                             train_preds_demand)^2) /
+  sum((train_data$total_resource_minus_total_demand_kg - 
+         mean(train_data$total_resource_minus_total_demand_kg))^2)
+#Test
+test_preds_demand <- predict(rf_demand, test_data)
+test_r2_demand <- 1 - sum((test_data$total_resource_minus_total_demand_kg - 
+                            test_preds_demand)^2) /
+  sum((test_data$total_resource_minus_total_demand_kg - 
+         mean(test_data$total_resource_minus_total_demand_kg))^2)
+# Print summary
+print(rf_demand)
+
+# Feature importance
+importance(rf_demand)
+
+# Save feature importance plot
+png("feature_importance_demand.png", width=800, height=600)
+varImpPlot(rf_model, 
+           main="Feature Importance - Demand-only Random Forest",
+           type=1)
+dev.off()
+
+cat("Demand-only RF Training R²:", round(train_r2_demand, 4), "\n")
+cat("Demand-only RF Test R²:", round(test_r2_demand, 4), "\n")
+
+#Full Model
 set.seed(42)
 
 rf_model <- randomForest(
