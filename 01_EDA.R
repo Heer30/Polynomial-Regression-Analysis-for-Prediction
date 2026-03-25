@@ -6,7 +6,7 @@ library(ggplot2)
 library(corrplot)
 library(maps)
 
-# ── 1. DISTRIBUTION PLOTS ─────────────────────────────────────
+# DISTRIBUTION PLOT
 # Response variable
 ggplot(model_data, aes(x = tot_kg)) +
   geom_histogram(bins = 50, fill = "steelblue", color = "white") +
@@ -34,7 +34,7 @@ for (var in predictors_log) {
   ggsave(paste0("hist_", var, ".png"), p, width = 8, height = 5)
 }
 
-# ── 2. ZERO INFLATION ANALYSIS ────────────────────────────────
+# ZERO INFLATION 
 zero_props <- colMeans(model_data == 0) * 100
 zero_df <- data.frame(
   variable = names(zero_props),
@@ -51,7 +51,7 @@ ggplot(zero_df, aes(x = reorder(variable, pct_zero), y = pct_zero)) +
             hjust = -0.1, size = 3.5)
 ggsave("zero_inflation.png", width = 8, height = 5)
 
-# ── 3. CORRELATION ANALYSIS ───────────────────────────────────
+#CORRELATION ANALYSIS
 cor_matrix <- cor(model_data_log[, c("log_tot_kg",
                                      predictors_log)],
                   use = "complete.obs")
@@ -68,7 +68,7 @@ corrplot(cor_matrix,
          mar = c(0, 0, 2, 0))
 dev.off()
 
-# ── 4. SCATTER PLOTS OF KEY RELATIONSHIPS ─────────────────────
+# SCATTER PLOTS OF KEY RELATIONSHIPS
 # Plot each predictor against response
 for (var in predictors_log) {
   p <- ggplot(model_data_log, aes_string(x = var, y = "log_tot_kg")) +
@@ -78,7 +78,7 @@ for (var in predictors_log) {
   ggsave(paste0("scatter_", var, ".png"), p, width = 8, height = 5)
 }
 
-# ── SCATTER PLOTS (key relationships only) ────────────────────
+#SCATTER PLOTS (key relationships only) 
 key_vars <- c("log_ld_fcev", "log_mhd_fcev", 
               "log_seasonal", "log_area")
 
@@ -93,11 +93,11 @@ for (var in key_vars) {
 }
 }
 
-# ── 5. SPATIAL ANALYSIS ───────────────────────────────────────
+# SPATIAL MAP
 # Merge with county map data
 county_map <- map_data("county")
 
-# You need fips codes to merge properly
+# fips codes to merge properly
 # Add state and county name columns to model_data first
 spatial_data <- data.frame(
   fips     = data$fips,
@@ -131,7 +131,7 @@ ggplot(map_merged, aes(x = long, y = lat,
         axis.ticks = element_blank())
 ggsave("spatial_map.png", width = 10, height = 6)
 
-# ── ZERO INFLATION BAR CHART ──────────────────────────────────
+#ZERO INFLATION BAR CHART
 zero_props <- colMeans(model_data == 0) * 100
 zero_df <- data.frame(
   variable = names(zero_props),
@@ -149,7 +149,7 @@ ggplot(zero_df, aes(x = reorder(variable, pct_zero), y = pct_zero)) +
   ylim(0, 105)
 ggsave("zero_inflation.png", width = 8, height = 5)
 
-# ── CORRELATION MATRIX ────────────────────────────────────────
+#CORRELATION MATRIX
 cor_vars <- model_data_log[, c("log_tot_kg", "log_ammonia",
                                "log_refineries", "log_metals",
                                "log_ld_fcev", "log_mhd_fcev",
@@ -167,7 +167,7 @@ corrplot(cor_matrix,
          mar = c(0, 0, 2, 0))
 dev.off()
 
-# ── SPATIAL MAP ───────────────────────────────────────────────
+#SPATIAL MAP
 spatial_data <- data.frame(
   state  = tolower(data$state_name),
   tot_kg = data$tot_kg
