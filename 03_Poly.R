@@ -1,7 +1,7 @@
 getwd()
 data <- read.csv("data1.csv")
 # STEP 5: Polynomial regression model
-# Adding squared terms to allow nonlinear scaling of sectoral hydrogen demand
+# Adding quadratic terms to allow nonlinear scaling of sectoral hydrogen demand
 
 model_poly <- lm(
   log_tot_kg ~ 
@@ -40,10 +40,10 @@ AIC(model_linear_log, model_poly, model_poly_cubic)
 # 1. Compute fitted values
 fitted_values <- model_poly$fitted.values
 
-# 2. Actual observed values
+# 2.Observed values
 observed_values <- model_data_log$log_tot_kg
 
-# 3. Basic scatter plot
+# 3. Scatter plot
 plot(observed_values, fitted_values,
      xlab = "Observed log(total hydrogen demand)",
      ylab = "Fitted log(total hydrogen demand)",
@@ -53,11 +53,11 @@ plot(observed_values, fitted_values,
 # 4. Add 45-degree reference line
 abline(a = 0, b = 1, col = "red", lwd = 2)
 
-#STEP 6.2 RESIDUALS VS PREDICTORS
-# 1. Compute residuals from the log-polynomial model
+# RESIDUALS VS PREDICTORS
+# 1. Residuals from the log-polynomial model
 residuals_poly <- model_poly$residuals
 
-# 2. Predictor to check
+# 2. Predictor
 predictor <- model_data_log$log_ld_fcev
 
 # 3. Plot residuals vs predictor
@@ -69,9 +69,9 @@ plot(predictor, residuals_poly,
 
 # 4. Add horizontal line at 0
 abline(h = 0, col = "blue", lwd = 2)
-# STEP 7: Interpretation and notes
 
-#Examples from Project 
+
+#Examples for Project 
 #1 Linear model, OLS and Residuals
 data_xy <- data[, c("solar_kg", "tot_kg")]
 data_xy <- na.omit(data_xy)
@@ -133,23 +133,3 @@ plot(fitted(model_poly), residuals(model_poly),
      pch = 16, col = rgb(0,0,1,0.5))
 abline(h = 0, col = "red", lwd = 2)
 dev.off()
-
-# ── LOESS SMOOTHS ─────────────────────────────────────────────
-# Purpose: Visualise the functional form of each predictor relationship
-# The varying shapes revealed by LOESS (U-shapes, convex, linear)
-# motivate fractional polynomial regression in Chapter 6,
-# where each predictor's transformation is selected from the data
-# rather than fixed at a uniform degree.
-
-predictors_log <- c("log_ammonia", "log_refineries", "log_metals",
-                    "log_ld_fcev", "log_mhd_fcev", "log_seasonal",
-                    "log_area")
-
-for (var in predictors_log) {
-  p <- ggplot(model_data_log, aes_string(x = var, y = "log_tot_kg")) +
-    geom_point(alpha = 0.2, color = "steelblue", size = 0.8) +
-    geom_smooth(method = "loess", color = "red", se = FALSE) +
-    labs(title = paste("log_tot_kg vs", var),
-         x = var, y = "log(Total Hydrogen Demand)")
-  ggsave(paste0("scatter_loess_", var, ".png"), p, width = 8, height = 5)
-}
